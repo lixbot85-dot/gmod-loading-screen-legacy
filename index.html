@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DownTown - Carregando</title>
+    <style>
+        body {
+            background-color: #1a1a1a; /* Fundo escuro */
+            color: #ddd;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .logo {
+            max-width: 300px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 10px rgba(0, 150, 255, 0.5));
+        }
+
+        #loadingtext {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-top: 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        #files {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 14px;
+            color: #aaa;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #files img {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Reflexo sutil para o texto */
+        .reflection {
+            -webkit-box-reflect: below -5px linear-gradient(transparent, rgba(255,255,255,0.1));
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Substitua 'loading.png' pela URL da sua imagem de carregamento -->
+        <img src="loading.png" class="logo" alt="DownTown Logo">
+        <div id="loadingtext" class="reflection">Preparando o mapa...</div>
+    </div>
+
+    <!-- Área de downloads -->
+    <div id="files"></div>
+
+    <script type="text/javascript">
+        // Frases personalizadas (pode adicionar as suas)
+        var keywords = [
+            "Limando as arestas do mapa...",
+            "Carregando DownTown...",
+            "Invocando NPCs...",
+            "Spawnando props...",
+            "Aplicando texturas...",
+            "Verificando addons...",
+            "Preparando o caos...",
+            "Dando vida ao servidor...",
+            "Ajustando a gravidade...",
+            "Polindo o motor Source...",
+            "Lendo arquivos Lua...",
+            "Conectando ao Steam...",
+            "Aquecendo as turbinas...",
+            "Carregando o Workshop..."
+        ];
+
+        var bCanChangeStatus = true;
+
+        function ChangeText() {
+            if (bCanChangeStatus) {
+                var keyword = keywords[Math.floor(Math.random() * keywords.length)];
+                document.getElementById("loadingtext").innerHTML = keyword;
+            }
+            setTimeout(ChangeText, 2500);
+        }
+
+        ChangeText();
+
+        var iFilesNeeded = 0;
+        var iFilesTotal = 0;
+        var bDownloadingFile = false;
+
+        // Funções essenciais que o GMod chama
+        function SetFilesNeeded(iNeeded) {
+            iFilesNeeded = iNeeded;
+            RefreshFileBox();
+        }
+
+        function SetFilesTotal(iTotal) {
+            iFilesTotal = iTotal;
+            RefreshFileBox();
+        }
+
+        function DownloadingFile(filename) {
+            if (bDownloadingFile) {
+                iFilesNeeded = iFilesNeeded - 1;
+                RefreshFileBox();
+            }
+            document.getElementById("loadingtext").innerHTML = "Baixando: " + filename;
+            bCanChangeStatus = false;
+            setTimeout(function() { bCanChangeStatus = true; }, 1000);
+            bDownloadingFile = true;
+        }
+
+        function SetStatusChanged(status) {
+            if (bDownloadingFile) {
+                iFilesNeeded = iFilesNeeded - 1;
+                bDownloadingFile = false;
+                RefreshFileBox();
+            }
+            document.getElementById("loadingtext").innerHTML = status;
+            bCanChangeStatus = false;
+            setTimeout(function() { bCanChangeStatus = true; }, 1000);
+        }
+
+        function RefreshFileBox() {
+            var fileBox = document.getElementById("files");
+            if (iFilesTotal > 0) {
+                fileBox.style.visibility = 'visible';
+                // Se você tiver um ícone de download, pode adicionar aqui. Por enquanto, apenas texto.
+                fileBox.innerHTML = "📥 " + iFilesNeeded + " downloads restantes";
+            } else {
+                fileBox.style.visibility = 'hidden';
+            }
+        }
+
+        RefreshFileBox();
+    </script>
+
+</body>
+</html>
