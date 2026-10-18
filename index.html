@@ -5,7 +5,7 @@
     <title>DownTown - Carregando</title>
     <style>
         body {
-            background-color: #1a1a1a; /* Fundo escuro */
+            background-color: #1a1a1a;
             color: #ddd;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -17,18 +17,15 @@
             height: 100vh;
             overflow: hidden;
         }
-
         .container {
             text-align: center;
         }
-
         .logo {
             max-width: 300px;
             height: auto;
             margin-bottom: 20px;
             filter: drop-shadow(0 0 10px rgba(0, 150, 255, 0.5));
         }
-
         #loadingtext {
             font-size: 18px;
             font-weight: bold;
@@ -36,7 +33,11 @@
             margin-top: 10px;
             text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
         }
-
+        #serverinfo {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #aaa;
+        }
         #files {
             position: absolute;
             bottom: 20px;
@@ -48,13 +49,10 @@
             align-items: center;
             gap: 5px;
         }
-
         #files img {
             width: 16px;
             height: 16px;
         }
-
-        /* Reflexo sutil para o texto */
         .reflection {
             -webkit-box-reflect: below -5px linear-gradient(transparent, rgba(255,255,255,0.1));
         }
@@ -65,14 +63,21 @@
     <div class="container">
         <!-- Substitua 'loading.png' pela URL da sua imagem de carregamento -->
         <img src="loading.png" class="logo" alt="DownTown Logo">
+        
+        <!-- Área para o status de carregamento -->
         <div id="loadingtext" class="reflection">Preparando o mapa...</div>
+        
+        <!-- Área para informações do servidor -->
+        <div id="serverinfo"></div>
     </div>
 
     <!-- Área de downloads -->
     <div id="files"></div>
 
     <script type="text/javascript">
-        // Frases personalizadas (pode adicionar as suas)
+        // ============================================
+        // FRASES PERSONALIZADAS
+        // ============================================
         var keywords = [
             "Limando as arestas do mapa...",
             "Carregando DownTown...",
@@ -99,36 +104,46 @@
             }
             setTimeout(ChangeText, 2500);
         }
-
         ChangeText();
 
+        // ============================================
+        // VARIÁVEIS DE CONTROLE
+        // ============================================
         var iFilesNeeded = 0;
         var iFilesTotal = 0;
         var bDownloadingFile = false;
 
-        // Funções essenciais que o GMod chama
-        function SetFilesNeeded(iNeeded) {
-            iFilesNeeded = iNeeded;
-            RefreshFileBox();
-        }
+        // ============================================
+        // FUNÇÕES QUE O GMOD CHAMA (VINCULADAS AO WINDOW)
+        // ============================================
 
-        function SetFilesTotal(iTotal) {
-            iFilesTotal = iTotal;
-            RefreshFileBox();
-        }
+        // 1. GameDetails - Recebe informações do servidor
+        window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume, language) {
+            // Exibe o nome do servidor e o mapa na tela
+            document.getElementById("serverinfo").innerHTML = 
+                "Servidor: " + servername + " | Mapa: " + mapname + " | Jogadores: " + maxplayers;
+        };
 
-        function DownloadingFile(filename) {
+        // 2. SetFilesTotal - Total de arquivos a serem baixados
+        window.SetFilesTotal = function(total) {
+            iFilesTotal = total;
+            RefreshFileBox();
+        };
+
+        // 3. DownloadingFile - Chamado quando um arquivo começa a ser baixado
+        window.DownloadingFile = function(fileName) {
             if (bDownloadingFile) {
                 iFilesNeeded = iFilesNeeded - 1;
                 RefreshFileBox();
             }
-            document.getElementById("loadingtext").innerHTML = "Baixando: " + filename;
+            document.getElementById("loadingtext").innerHTML = "Baixando: " + fileName;
             bCanChangeStatus = false;
             setTimeout(function() { bCanChangeStatus = true; }, 1000);
             bDownloadingFile = true;
-        }
+        };
 
-        function SetStatusChanged(status) {
+        // 4. SetStatusChanged - Chamado quando o status de entrada muda
+        window.SetStatusChanged = function(status) {
             if (bDownloadingFile) {
                 iFilesNeeded = iFilesNeeded - 1;
                 bDownloadingFile = false;
@@ -137,19 +152,28 @@
             document.getElementById("loadingtext").innerHTML = status;
             bCanChangeStatus = false;
             setTimeout(function() { bCanChangeStatus = true; }, 1000);
-        }
+        };
 
+        // 5. SetFilesNeeded - Número de arquivos restantes
+        window.SetFilesNeeded = function(needed) {
+            iFilesNeeded = needed;
+            RefreshFileBox();
+        };
+
+        // ============================================
+        // FUNÇÃO AUXILIAR PARA ATUALIZAR A CAIXA DE DOWNLOADS
+        // ============================================
         function RefreshFileBox() {
             var fileBox = document.getElementById("files");
             if (iFilesTotal > 0) {
                 fileBox.style.visibility = 'visible';
-                // Se você tiver um ícone de download, pode adicionar aqui. Por enquanto, apenas texto.
                 fileBox.innerHTML = "📥 " + iFilesNeeded + " downloads restantes";
             } else {
                 fileBox.style.visibility = 'hidden';
             }
         }
 
+        // Inicializa a caixa de downloads como oculta
         RefreshFileBox();
     </script>
 
